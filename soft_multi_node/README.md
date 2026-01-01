@@ -3,7 +3,7 @@
 ```shell
 lspci | grep Xilinx
 ```
-2. `--macs` specifies the MAC addresses stored in the witch for each participating node
+2. `--macs` specifies the MAC addresses stored in the switch for each participating node
 
 ## Environment
 1. The switch needs to support FPGA MAC-based forwarding
