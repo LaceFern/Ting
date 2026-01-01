@@ -20,4 +20,4 @@
 ### Hardware Requirements
 
 - **FPGA**: Xilinx Alveo U280
-- **Network**: FPGA MAC-based forwarding support
+- **Network**:  Switch that supports statically configured MAC-based forwarding
