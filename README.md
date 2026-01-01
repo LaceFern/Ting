@@ -19,11 +19,5 @@
 
 ### Hardware Requirements
 
-- **FPGA**: Xilinx Alveo U280 (or compatible)
-- **Network**: P4 switch with FPGA MAC-based forwarding support
-- **Memory**: Hugepages enabled
-### FPGA Setup
-
-1. FPGA must be connected to P4 switch (ARP not implemented)
-2. P4 switch must support FPGA MAC-based forwarding
-3. FPGA must be programmed with bitstream
+- **FPGA**: Xilinx Alveo U280
+- **Network**: FPGA MAC-based forwarding support
