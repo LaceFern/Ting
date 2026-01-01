@@ -1,0 +1,381 @@
+#ifndef __DATABASE_TPCC_PROCEDURE_H__
+#define __DATABASE_TPCC_PROCEDURE_H__
+#include "StoredProcedure.h"
+#include "TpccKeyGenerator.h"
+#include "TpccTxnParams.h"
+#include <iostream>
+#include <string>
+namespace Database {
+namespace TpccBenchmark {
+class DeliveryProcedure : public StoredProcedure {
+ public:
+  DeliveryProcedure() {
+    context_.txn_type_ = DELIVERY;
+  }
+  virtual ~DeliveryProcedure() {
+  }
+  virtual bool Execute(TxnParam *param, CharArray &ret) {
+    DeliveryParam* delivery_param = static_cast<DeliveryParam*>(param);
+    for (int no_d_id = 1; no_d_id <= DISTRICTS_PER_WAREHOUSE; ++no_d_id) {
+      Record *district_new_order_record = nullptr;
+      IndexKey district_new_order_key = GetDistrictNewOrderPrimaryKey(
+          no_d_id, delivery_param->w_id_);
+      DB_QUERY(
+          SearchRecord(&context_, DISTRICT_NEW_ORDER_TABLE_ID, district_new_order_key, district_new_order_record, READ_WRITE));
+      int no_o_id = 0;
+      district_new_order_record->GetColumn(2, &no_o_id);
+      assert(no_o_id != 0);
+      IndexKey new_order_key = GetNewOrderPrimaryKey(no_o_id, no_d_id,
+                                                     delivery_param->w_id_);
+      Record *new_order_record = nullptr;
+      if (transaction_manager_->SearchRecord(&context_, NEW_ORDER_TABLE_ID,
+                                             new_order_key, new_order_record,
+                                             READ_ONLY)) {
+        no_o_ids[no_d_id - 1] = no_o_id;
+        int next_o_id = no_o_id + 1;
+        district_new_order_record->SetColumn(2, &next_o_id);
+      } else {
+        no_o_ids[no_d_id - 1] = -1;
+        int next_o_id = 1;
+        district_new_order_record->SetColumn(2, &next_o_id);
+      }
+    }
+    for (int no_d_id = 1; no_d_id <= DISTRICTS_PER_WAREHOUSE; ++no_d_id) {
+      if (no_o_ids[no_d_id - 1] == -1) {
+        continue;
+      }
+      IndexKey order_key = GetOrderPrimaryKey(no_o_ids[no_d_id - 1], no_d_id,
+                                              delivery_param->w_id_);
+      Record *order_record = nullptr;
+      DB_QUERY(
+          SearchRecord(&context_, ORDER_TABLE_ID, order_key, order_record, READ_WRITE));
+      order_record->SetColumn(5, &delivery_param->o_carrier_id_);
+      int c_id = 0;
+      order_record->GetColumn(1, &c_id);
+      assert(c_id != 0);
+      c_ids[no_d_id - 1] = c_id;
+    }
+    for (int no_d_id = 1; no_d_id <= DISTRICTS_PER_WAREHOUSE; ++no_d_id) {
+      if (no_o_ids[no_d_id - 1] == -1) {
+        continue;
+      }
+      IndexKey customer_key = GetCustomerPrimaryKey(c_ids[no_d_id - 1], no_d_id,
+                                                    delivery_param->w_id_);
+      Record *customer_record = nullptr;
+      DB_QUERY(
+          SearchRecord(&context_, CUSTOMER_TABLE_ID, customer_key, customer_record, READ_WRITE));
+      double balance = 0.0;
+      customer_record->GetColumn(16, &balance);
+      balance += sums[no_d_id - 1];
+      customer_record->SetColumn(16, &balance);
+    }
+    for (size_t no_d_id = 1; no_d_id <= DISTRICTS_PER_WAREHOUSE; ++no_d_id) {
+      ret.Memcpy(ret.size_, (char*) (&no_o_ids[no_d_id - 1]), sizeof(int));
+      ret.size_ += sizeof(int);
+      ret.Memcpy(ret.size_, (char*) (&no_d_id), sizeof(int));
+      ret.size_ += sizeof(int);
+    }
+    return transaction_manager_->CommitTransaction(&context_, param, ret);
+  }
+ private:
+  int no_o_ids[DISTRICTS_PER_WAREHOUSE];
+  double sums[DISTRICTS_PER_WAREHOUSE];
+  int c_ids[DISTRICTS_PER_WAREHOUSE];
+};
+class NewOrderProcedure : public StoredProcedure {
+ public:
+  NewOrderProcedure() {
+    context_.txn_type_ = NEW_ORDER;
+  }
+  virtual ~NewOrderProcedure() {
+  }
+  virtual bool Execute(TxnParam *param, CharArray &ret) {
+    epicLog(LOG_DEBUG, "thread_id=%u,start new order", thread_id_);
+    NewOrderParam *new_order_param = static_cast<NewOrderParam*>(param);
+    double total = 0;
+    for (size_t i = 0; i < new_order_param->ol_cnt_; ++i) {
+      int item_id = new_order_param->i_ids_[i];
+      IndexKey item_key = GetItemPrimaryKey(item_id, new_order_param->w_id_);
+      Record *item_record = nullptr;
+      if (transaction_manager_->SearchRecord(
+          &context_, ITEM_TABLE_ID, item_key, item_record,
+          (AccessType) new_order_param->item_access_type_[i]) == false) {
+        assert(false);
+        transaction_manager_->AbortTransaction();
+        return false;
+      }
+      double price = 0;
+      item_record->GetColumn(3, &price);
+      ret.Memcpy(ret.size_, (char*) (&item_id), sizeof(item_id));
+      ret.size_ += sizeof(item_id);
+      ret.Memcpy(ret.size_, (char*) (&price), sizeof(price));
+      ret.size_ += sizeof(price);
+      int ol_quantity = new_order_param->i_qtys_[i];
+      double ol_amount = ol_quantity * price;
+      ol_amounts[i] = ol_amount;
+      total += ol_amount;
+    }
+    for (size_t i = 0; i < new_order_param->ol_cnt_; ++i) {
+      int ol_i_id = new_order_param->i_ids_[i];
+      int ol_supply_w_id = new_order_param->i_w_ids_[i];
+      IndexKey stock_key = GetStockPrimaryKey(ol_i_id, ol_supply_w_id);
+      Record *stock_record = nullptr;
+      DB_QUERY(
+          SearchRecord(&context_, STOCK_TABLE_ID, stock_key, stock_record, (AccessType)new_order_param->stock_access_type_[i]));  
+      int ol_quantity = new_order_param->i_qtys_[i];
+      int ytd = 0;
+      stock_record->GetColumn(13, &ytd);
+      ytd += ol_quantity;
+      stock_record->SetColumn(13, &ytd);
+      int quantity = 0;
+      stock_record->GetColumn(2, &quantity);
+      if (quantity >= ol_quantity + 10) {
+        quantity -= ol_quantity;
+        stock_record->SetColumn(2, &quantity);
+      } else {
+        quantity = quantity + 91 - ol_quantity;
+        stock_record->SetColumn(2, &quantity);
+      }
+      int order_cnt = 0;
+      stock_record->GetColumn(14, &order_cnt);
+      order_cnt += 1;
+      stock_record->SetColumn(14, &order_cnt);
+      if (ol_supply_w_id != new_order_param->w_id_) {
+        int remote_cnt = 0;
+        stock_record->GetColumn(15, &remote_cnt);
+        remote_cnt += 1;
+        stock_record->SetColumn(15, &remote_cnt);
+      }
+      int dist_column = new_order_param->d_id_ + 2;
+      stock_record->GetColumn(dist_column, s_dists[i]);
+    }
+    IndexKey warehouse_key = GetWarehousePrimaryKey(new_order_param->w_id_);
+    Record *warehouse_record = nullptr;
+    DB_QUERY(
+        SearchRecord(&context_, WAREHOUSE_TABLE_ID, warehouse_key, warehouse_record, (AccessType)new_order_param->warehouse_access_type_));
+    double w_tax = 0;
+    warehouse_record->GetColumn(7, &w_tax);
+    IndexKey district_key = GetDistrictPrimaryKey(new_order_param->d_id_,
+                                                  new_order_param->w_id_);
+    Record *district_record = nullptr;
+    DB_QUERY(
+        SearchRecord(&context_, DISTRICT_TABLE_ID, district_key, district_record, (AccessType)new_order_param->district_access_type_));
+    int d_next_o_id = 0;
+    district_record->GetColumn(10, &d_next_o_id);
+    assert(d_next_o_id > 0);
+    ret.Memcpy(ret.size_, (char*) (&d_next_o_id), sizeof(d_next_o_id));
+    ret.size_ += sizeof(d_next_o_id);
+    double d_tax = 0.0;
+    district_record->GetColumn(8, &d_tax);
+    int o_id = d_next_o_id + 1;
+    district_record->SetColumn(10, &o_id);
+    IndexKey customer_key = GetCustomerPrimaryKey(new_order_param->c_id_,
+                                                  new_order_param->d_id_,
+                                                  new_order_param->w_id_);
+    Record *customer_record = nullptr;
+    DB_QUERY(
+        SearchRecord(&context_, CUSTOMER_TABLE_ID, customer_key, customer_record, (AccessType)new_order_param->customer_access_type_));
+    double c_discount = 0;
+    customer_record->GetColumn(15, &c_discount);
+    GAddr new_order_addr = gallocators[thread_id_]->Malloc(
+        transaction_manager_->storage_manager_->
+        tables_[NEW_ORDER_TABLE_ID]->GetSchemaSize());
+    Record *new_order_record = new Record(
+        transaction_manager_->storage_manager_->
+        tables_[NEW_ORDER_TABLE_ID]->GetSchema());
+    new_order_record->SetColumn(0, (char*) (&d_next_o_id));
+    new_order_record->SetColumn(1, (char*) (&new_order_param->d_id_));
+    new_order_record->SetColumn(2, (char*) (&new_order_param->w_id_));
+    new_order_record->SetVisible(true);
+    if (new_order_param->new_order_access_type_ != READ_ONLY) {
+      new_order_record->Serialize(new_order_addr, gallocators[thread_id_]);
+    }
+    IndexKey new_order_key = GetNewOrderPrimaryKey(d_next_o_id,
+                                                   new_order_param->d_id_,
+                                                   new_order_param->w_id_);
+    DB_QUERY(
+        InsertRecord(&context_, NEW_ORDER_TABLE_ID, 
+          &new_order_key, 1, new_order_record, new_order_addr));
+     bool all_local_flag = true;
+        for (auto &w_id : new_order_param->i_w_ids_) {
+          all_local_flag = (all_local_flag && (new_order_param->w_id_ == w_id));
+        }
+    int all_local = all_local_flag ? 1 : 0;
+    GAddr order_addr = gallocators[thread_id_]->Malloc(
+        transaction_manager_->storage_manager_->
+        tables_[ORDER_TABLE_ID]->GetSchemaSize());
+    Record *order_record = new Record(
+        transaction_manager_->storage_manager_->
+        tables_[ORDER_TABLE_ID]->GetSchema()
+        );
+    order_record->SetColumn(0, (char*) (&d_next_o_id));
+    order_record->SetColumn(1, (char*) (&new_order_param->c_id_));
+    order_record->SetColumn(2, (char*) (&new_order_param->d_id_));
+    order_record->SetColumn(3, (char*) (&new_order_param->w_id_));
+    order_record->SetColumn(4, (char*) (&new_order_param->o_entry_d_));
+    order_record->SetColumn(5, (char*) (&NULL_CARRIER_ID));
+    order_record->SetColumn(6, (char*) (&new_order_param->ol_cnt_));
+    order_record->SetColumn(7, (char*) (&all_local));
+    order_record->SetVisible(true);
+    if (new_order_param->order_access_type_ != READ_ONLY) {
+      order_record->Serialize(order_addr, gallocators[thread_id_]);
+    }
+    IndexKey order_key = GetOrderPrimaryKey(d_next_o_id, new_order_param->d_id_,
+                                            new_order_param->w_id_);
+    DB_QUERY(
+        InsertRecord(&context_, ORDER_TABLE_ID, 
+          &order_key, 1, order_record, order_addr));
+    for (size_t i = 0; i < new_order_param->ol_cnt_; ++i) {
+      int ol_number = i + 1;
+      int ol_i_id = new_order_param->i_ids_[i];
+      int ol_supply_w_id = new_order_param->i_w_ids_[i];
+      int ol_quantity = new_order_param->i_qtys_[i];
+      GAddr order_line_addr = gallocators[thread_id_]->Malloc(
+          transaction_manager_->storage_manager_->
+          tables_[ORDER_LINE_TABLE_ID]->GetSchemaSize());
+      Record *order_line_record = new Record(
+          transaction_manager_->storage_manager_->
+          tables_[ORDER_LINE_TABLE_ID]->GetSchema()
+          );
+      order_line_record->SetColumn(0, (char*) (&d_next_o_id));
+      order_line_record->SetColumn(1, (char*) (&new_order_param->d_id_));
+      order_line_record->SetColumn(2, (char*) (&new_order_param->w_id_));
+      order_line_record->SetColumn(3, (char*) (&ol_number));
+      order_line_record->SetColumn(4, (char*) (&ol_i_id));
+      order_line_record->SetColumn(5, (char*) (&ol_supply_w_id));
+      order_line_record->SetColumn(6, (char*) (&new_order_param->o_entry_d_));
+      order_line_record->SetColumn(7, (char*) (&ol_quantity));
+      order_line_record->SetColumn(8, (char*) (&ol_amounts[i]));
+      order_line_record->SetColumn(9, s_dists[i]);
+      order_line_record->SetVisible(true);
+      if (new_order_param->order_line_access_type_[i] != READ_ONLY) {
+        order_line_record->Serialize(order_line_addr, gallocators[thread_id_]);
+      }
+      IndexKey order_line_key = GetOrderLinePrimaryKey(d_next_o_id,
+                                                       new_order_param->d_id_,
+                                                       new_order_param->w_id_,
+                                                       ol_number);
+      DB_QUERY(
+          InsertRecord(&context_, ORDER_LINE_TABLE_ID, 
+            &order_line_key, 1, order_line_record, order_line_addr));
+    }
+    ret.Memcpy(ret.size_, (char*) (&w_tax), sizeof(w_tax));
+    ret.size_ += sizeof(w_tax);
+    ret.Memcpy(ret.size_, (char*) (&d_tax), sizeof(d_tax));
+    ret.size_ += sizeof(d_tax);
+    ret.Memcpy(ret.size_, (char*) (&c_discount), sizeof(c_discount));
+    ret.size_ += sizeof(c_discount);
+    total *= (1 - c_discount) * (1 + w_tax + d_tax);
+    ret.size_ += sizeof(total);
+    return transaction_manager_->CommitTransaction(&context_, param, ret);
+  }
+ private:
+  double ol_amounts[15];
+  char s_dists[15][33];
+};
+class PaymentProcedure : public StoredProcedure {
+ public:
+  PaymentProcedure() {
+    context_.txn_type_ = PAYMENT;
+  }
+  virtual ~PaymentProcedure() {
+  }
+  virtual bool Execute(TxnParam *param, CharArray &ret) {
+    epicLog(LOG_DEBUG, "thread_id=%u,start payment", thread_id_);
+    PaymentParam *payment_param = static_cast<PaymentParam*>(param);
+    IndexKey warehouse_key = GetWarehousePrimaryKey(payment_param->w_id_);
+    Record *warehouse_record = nullptr;
+    DB_QUERY(
+        SearchRecord(&context_, WAREHOUSE_TABLE_ID, warehouse_key, warehouse_record, (AccessType)payment_param->warehouse_access_type_));
+    double w_ytd = 0;
+    warehouse_record->GetColumn(8, &w_ytd);
+    ret.Memcpy(ret.size_, (char*) (&w_ytd), sizeof(w_ytd));
+    ret.size_ += sizeof(w_ytd);
+    double new_w_ytd = w_ytd + payment_param->h_amount_;
+    warehouse_record->SetColumn(8, &new_w_ytd);
+    IndexKey district_key = GetDistrictPrimaryKey(payment_param->d_id_,
+                                                  payment_param->w_id_);
+    Record *district_record = nullptr;
+    DB_QUERY(
+        SearchRecord(&context_, DISTRICT_TABLE_ID, district_key, district_record, (AccessType)payment_param->district_access_type_));
+    double d_ytd = 0;
+    district_record->GetColumn(9, &d_ytd);
+    ret.Memcpy(ret.size_, (char*) (&d_ytd), sizeof(d_ytd));
+    ret.size_ += sizeof(d_ytd);
+    double new_d_ytd = d_ytd + payment_param->h_amount_;
+    district_record->SetColumn(9, &new_d_ytd);
+    Record *customer_record = nullptr;
+    if (payment_param->c_id_ == -1) {
+    } else {
+      IndexKey customer_key = GetCustomerPrimaryKey(payment_param->c_id_,
+                                                    payment_param->c_d_id_,
+                                                    payment_param->c_w_id_);
+      DB_QUERY(
+          SearchRecord(&context_, CUSTOMER_TABLE_ID, customer_key, customer_record, (AccessType)payment_param->customer_access_type_));
+    }
+    double balance = 0.0;
+    customer_record->GetColumn(16, &balance);
+    balance -= payment_param->h_amount_;
+    customer_record->SetColumn(16, &balance);
+    double ytd_payment = 0.0;
+    customer_record->GetColumn(17, &ytd_payment);
+    ytd_payment += payment_param->h_amount_;
+    customer_record->SetColumn(17, &ytd_payment);
+    int payment_cnt = 0;
+    customer_record->GetColumn(18, &payment_cnt);
+    payment_cnt += 1;
+    customer_record->SetColumn(18, &payment_cnt);
+    GAddr history_addr = gallocators[thread_id_]->Malloc(
+        transaction_manager_->storage_manager_->
+        tables_[HISTORY_TABLE_ID]->GetSchemaSize());
+    Record *history_record = new Record(
+        transaction_manager_->storage_manager_->
+        tables_[HISTORY_TABLE_ID]->GetSchema()
+        );
+    history_record->SetColumn(0, (char*) (&payment_param->c_id_));
+    history_record->SetColumn(1, (char*) (&payment_param->c_d_id_));
+    history_record->SetColumn(2, (char*) (&payment_param->c_w_id_));
+    history_record->SetColumn(3, (char*) (&payment_param->d_id_));
+    history_record->SetColumn(4, (char*) (&payment_param->w_id_));
+    history_record->SetColumn(5, (char*) (&payment_param->h_date_));
+    history_record->SetColumn(6, (char*) (&payment_param->h_amount_));
+    history_record->SetVisible(true);
+    if (payment_param->history_access_type_ != READ_ONLY) {
+      history_record->Serialize(history_addr, gallocators[thread_id_]);
+    }
+    IndexKey history_key = GetHistoryPrimaryKey(payment_param->c_id_,
+                                                payment_param->d_id_,
+                                                payment_param->w_id_);
+    DB_QUERY(
+        InsertRecord(&context_, HISTORY_TABLE_ID, 
+          &history_key, 1, history_record, history_addr));
+    return transaction_manager_->CommitTransaction(&context_, param, ret);
+  }
+};
+class OrderStatusProcedure : public StoredProcedure {
+ public:
+  OrderStatusProcedure() {
+    context_.txn_type_ = ORDER_STATUS;
+  }
+  virtual ~OrderStatusProcedure() {
+  }
+  virtual bool Execute(TxnParam *param, CharArray &ret) {
+    OrderStatusParam *order_status_param = static_cast<OrderStatusParam*>(param);
+    return transaction_manager_->CommitTransaction(&context_, param, ret);
+  }
+};
+class StockLevelProcedure : public StoredProcedure {
+ public:
+  StockLevelProcedure() {
+    context_.txn_type_ = STOCK_LEVEL;
+  }
+  virtual ~StockLevelProcedure() {
+  }
+  virtual bool Execute(TxnParam *param, CharArray &ret) {
+    StockLevelParam *stock_level_param = static_cast<StockLevelParam*>(param);
+    return transaction_manager_->CommitTransaction(&context_, param, ret);
+  }
+};
+}
+}
+#endif

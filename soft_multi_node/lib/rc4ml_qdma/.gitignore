@@ -1,0 +1,5 @@
+build
+cmake*
+.vscode
+.idea
+qdma_soft.code-workspace

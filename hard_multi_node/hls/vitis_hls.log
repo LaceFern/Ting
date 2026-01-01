@@ -1,0 +1,102 @@
+
+****** Vitis HLS - High-Level Synthesis from C, C++ and OpenCL v2021.1 (64-bit)
+  **** SW Build 3247384 on Thu Jun 10 19:36:07 MDT 2021
+  **** IP Build 3246043 on Fri Jun 11 00:30:35 MDT 2021
+    ** Copyright 1986-2021 Xilinx, Inc. All Rights Reserved.
+
+source /tools/Xilinx/Vitis_HLS/2021.1/scripts/vitis_hls/hls.tcl -notrace
+INFO: Applying HLS Y2K22 patch v1.2 for IP revision
+INFO: [HLS 200-10] Running '/tools/Xilinx/Vitis_HLS/2021.1/bin/unwrapped/lnx64.o/vitis_hls'
+INFO: [HLS 200-10] For user 'zxy' on host 'stat' (Linux_x86_64 version 5.4.0-80-generic) on Sat Oct 18 16:54:12 CST 2025
+INFO: [HLS 200-10] On os Ubuntu 18.04.5 LTS
+INFO: [HLS 200-10] In directory '/home/zxy/nfs/DSM_prj/FPGA-DSM/hard_multi_node/hls'
+WARNING: [HLS 200-40] Environment variable 'C_INCLUDE_PATH' is set to /opt/xilinx/xrt/include.
+WARNING: [HLS 200-40] Environment variable 'CPLUS_INCLUDE_PATH' is set to :/tools/Xilinx/Vivado/2020.1/include/:/tools/Xilinx/Vivado/2020.1/include/:/opt/xilinx/xrt/include:/opt/xilinx/xrt/include:/opt/xilinx/xrt/include.
+Sourcing Tcl script '/home/zxy/2024_vivado_pro/DSM/test_pro_multi_node_2/rc4ml_static_u280/rc4ml_static_u280.srcs/dynamic_sources/gen_HLSIP_script.tcl'
+INFO: [HLS 200-1510] Running: open_project -reset highPara 
+INFO: [HLS 200-10] Creating and opening project '/home/zxy/nfs/DSM_prj/FPGA-DSM/hard_multi_node/hls/highPara'.
+INFO: [HLS 200-1510] Running: set_top lock_pool 
+INFO: [HLS 200-1510] Running: add_files ./highPara/src/tmp/tmp.cpp 
+INFO: [HLS 200-10] Adding design file './highPara/src/tmp/tmp.cpp' to the project
+INFO: [HLS 200-1510] Running: add_files ./highPara/src/utils.hpp 
+INFO: [HLS 200-10] Adding design file './highPara/src/utils.hpp' to the project
+INFO: [HLS 200-1510] Running: add_files ./highPara/src/utils.cpp 
+INFO: [HLS 200-10] Adding design file './highPara/src/utils.cpp' to the project
+INFO: [HLS 200-1510] Running: open_solution lock_pool 
+INFO: [HLS 200-10] Creating and opening solution '/home/zxy/nfs/DSM_prj/FPGA-DSM/hard_multi_node/hls/highPara/lock_pool'.
+INFO: [HLS 200-1505] Using default flow_target 'vivado'
+Resolution: For help on HLS 200-1505 see www.xilinx.com/cgi-bin/docs/rdoc?v=2021.1;t=hls+guidance;d=200-1505.html
+INFO: [HLS 200-1510] Running: set_part xcu280-fsvh2892-2L-e 
+INFO: [HLS 200-1611] Setting target device to 'xcu280-fsvh2892-2L-e'
+INFO: [HLS 200-1510] Running: create_clock -period 4 -name default 
+INFO: [SYN 201-201] Setting up clock 'default' with a period of 4ns.
+INFO: [HLS 200-1510] Running: config_export -format ip_catalog -rtl verilog 
+INFO: [HLS 200-1510] Running: csynth_design 
+INFO: [HLS 200-111] Finished File checks and directory preparation: CPU user time: 0.02 seconds. CPU system time: 0 seconds. Elapsed time: 0.01 seconds; current allocated memory: 218.876 MB.
+INFO: [HLS 200-10] Analyzing design file './highPara/src/utils.cpp' ... 
+WARNING: [HLS 207-5301] unused parameter 'print': /tools/Xilinx/Vitis_HLS/2021.1/common/technology/autopilot/ap_int_base.h:792:16
+INFO: [HLS 200-10] Analyzing design file './highPara/src/tmp/tmp.cpp' ... 
+WARNING: [HLS 207-5301] unused parameter 'print': /tools/Xilinx/Vitis_HLS/2021.1/common/technology/autopilot/ap_int_base.h:792:16
+INFO: [HLS 200-111] Finished Source Code Analysis and Preprocessing: CPU user time: 7.82 seconds. CPU system time: 0.52 seconds. Elapsed time: 8.26 seconds; current allocated memory: 220.932 MB.
+INFO: [HLS 200-777] Using interface defaults for 'Vivado' flow target.
+INFO: [HLS 214-279] Initial Interval estimation mode is set into default.
+INFO: [HLS 214-284] Auto array partition mode is set into default.
+INFO: [HLS 214-131] Inlining function 'hls::stream<dir_ack, 0>::read(dir_ack&)' into 'hls::stream<dir_ack, 0>::read()' (/tools/Xilinx/Vitis_HLS/2021.1/common/technology/autopilot/hls_stream_39.h:156:9)
+INFO: [HLS 214-131] Inlining function 'hls::stream<ctrl_msg, 0>::read(ctrl_msg&)' into 'hls::stream<ctrl_msg, 0>::read()' (/tools/Xilinx/Vitis_HLS/2021.1/common/technology/autopilot/hls_stream_39.h:156:9)
+INFO: [HLS 214-131] Inlining function 'hls::stream<ctrl_msg, 0>::write(ctrl_msg const&)' into 'hls::stream<ctrl_msg, 0>::operator<<(ctrl_msg const&)' (/tools/Xilinx/Vitis_HLS/2021.1/common/technology/autopilot/hls_stream_39.h:129:9)
+INFO: [HLS 214-131] Inlining function 'hls::stream<dir_cmd, 0>::write(dir_cmd const&)' into 'hls::stream<dir_cmd, 0>::operator<<(dir_cmd const&)' (/tools/Xilinx/Vitis_HLS/2021.1/common/technology/autopilot/hls_stream_39.h:129:9)
+INFO: [HLS 214-131] Inlining function 'hls::stream<dir_cmd, 0>::operator<<(dir_cmd const&)' into 'lock_pool(hls::stream<ctrl_msg, 0>&, hls::stream<dir_cmd, 0>&, hls::stream<ctrl_msg, 0>&, hls::stream<dir_ack, 0>&, hls::stream<ctrl_msg, 0>&, ap_uint<32>&, ap_uint<32>&)' (./highPara/src/tmp/tmp.cpp:121:63)
+INFO: [HLS 214-131] Inlining function 'hls::stream<ctrl_msg, 0>::operator<<(ctrl_msg const&)' into 'lock_pool(hls::stream<ctrl_msg, 0>&, hls::stream<dir_cmd, 0>&, hls::stream<ctrl_msg, 0>&, hls::stream<dir_ack, 0>&, hls::stream<ctrl_msg, 0>&, ap_uint<32>&, ap_uint<32>&)' (./highPara/src/tmp/tmp.cpp:118:66)
+INFO: [HLS 214-131] Inlining function 'hls::stream<ctrl_msg, 0>::read()' into 'lock_pool(hls::stream<ctrl_msg, 0>&, hls::stream<dir_cmd, 0>&, hls::stream<ctrl_msg, 0>&, hls::stream<dir_ack, 0>&, hls::stream<ctrl_msg, 0>&, ap_uint<32>&, ap_uint<32>&)' (./highPara/src/tmp/tmp.cpp:92:74)
+INFO: [HLS 214-131] Inlining function 'hls::stream<ctrl_msg, 0>::empty() const' into 'lock_pool(hls::stream<ctrl_msg, 0>&, hls::stream<dir_cmd, 0>&, hls::stream<ctrl_msg, 0>&, hls::stream<dir_ack, 0>&, hls::stream<ctrl_msg, 0>&, ap_uint<32>&, ap_uint<32>&)' (./highPara/src/tmp/tmp.cpp:91:55)
+INFO: [HLS 214-131] Inlining function 'hls::stream<ctrl_msg, 0>::read()' into 'lock_pool(hls::stream<ctrl_msg, 0>&, hls::stream<dir_cmd, 0>&, hls::stream<ctrl_msg, 0>&, hls::stream<dir_ack, 0>&, hls::stream<ctrl_msg, 0>&, ap_uint<32>&, ap_uint<32>&)' (./highPara/src/tmp/tmp.cpp:78:72)
+INFO: [HLS 214-131] Inlining function 'hls::stream<dir_ack, 0>::read()' into 'lock_pool(hls::stream<ctrl_msg, 0>&, hls::stream<dir_cmd, 0>&, hls::stream<ctrl_msg, 0>&, hls::stream<dir_ack, 0>&, hls::stream<ctrl_msg, 0>&, ap_uint<32>&, ap_uint<32>&)' (./highPara/src/tmp/tmp.cpp:77:68)
+INFO: [HLS 214-131] Inlining function 'hls::stream<ctrl_msg, 0>::empty() const' into 'lock_pool(hls::stream<ctrl_msg, 0>&, hls::stream<dir_cmd, 0>&, hls::stream<ctrl_msg, 0>&, hls::stream<dir_ack, 0>&, hls::stream<ctrl_msg, 0>&, ap_uint<32>&, ap_uint<32>&)' (./highPara/src/tmp/tmp.cpp:76:86)
+INFO: [HLS 214-131] Inlining function 'hls::stream<dir_ack, 0>::empty() const' into 'lock_pool(hls::stream<ctrl_msg, 0>&, hls::stream<dir_cmd, 0>&, hls::stream<ctrl_msg, 0>&, hls::stream<dir_ack, 0>&, hls::stream<ctrl_msg, 0>&, ap_uint<32>&, ap_uint<32>&)' (./highPara/src/tmp/tmp.cpp:76:50)
+INFO: [HLS 214-178] Inlining function 'ctrl_msg::ctrl_msg()' into 'lock_pool(hls::stream<ctrl_msg, 0>&, hls::stream<dir_cmd, 0>&, hls::stream<ctrl_msg, 0>&, hls::stream<dir_ack, 0>&, hls::stream<ctrl_msg, 0>&, ap_uint<32>&, ap_uint<32>&)' (./highPara/src/tmp/tmp.cpp:16:0)
+INFO: [HLS 214-241] Aggregating scalar variable 'debug_retry_flag' with field bit alignment mode in 32-bits (./highPara/src/tmp/tmp.cpp:16:0)
+INFO: [HLS 214-241] Aggregating scalar variable 'debug_source_flag' with field bit alignment mode in 32-bits (./highPara/src/tmp/tmp.cpp:16:0)
+INFO: [HLS 214-241] Aggregating axis (hls::stream) variable 'ctrl_msg_f_D_t_DC_in' with field bit alignment mode in 528-bits (./highPara/src/tmp/tmp.cpp:16:0)
+INFO: [HLS 214-241] Aggregating axis (hls::stream) variable 'ctrl_msg_r_f_DC_t_DC_out' with field bit alignment mode in 528-bits (./highPara/src/tmp/tmp.cpp:16:0)
+INFO: [HLS 214-241] Aggregating axis (hls::stream) variable 'ctrl_msg_w_f_DC_t_DC_in' with field bit alignment mode in 528-bits (./highPara/src/tmp/tmp.cpp:16:0)
+INFO: [HLS 214-270] Starting automatic array partition analysis...
+INFO: [HLS 214-282] Aggregating variable 'dir_cmd_f_DC_t_DI_out' with 'compact=none' mode (./highPara/src/tmp/tmp.cpp:16:0)
+INFO: [HLS 214-282] Aggregating variable 'dir_ack_f_DI_t_DC_in' with 'compact=none' mode (./highPara/src/tmp/tmp.cpp:16:0)
+INFO: [HLS 214-131] Inlining function '_llvm.fpga.pack.none.i704.sl_s_struct.ap_uint.9ss_struct.ap_uint.9ss_struct.ap_uint.9ss_struct.ap_uint.0ss_struct.ap_uint.12ss_struct.ap_uint.0ss_struct.ap_uint.9ss_struct.ap_uint.0ss_struct.ap_uint.0ss_struct.ap_uint.12sa8s_struct.ap_uint.9ss_struct.ap_uint.9ss_struct.ap_uint.9ss_struct.ap_uint.9ss_struct.ap_uint.6ss_struct.ap_uint.15ss_struct.ap_uint.9ss_struct.ap_uint.9ss_struct.ap_uint.9ss' into '_llvm.fpga.unpack.bits.s_struct.ctrl_msgs.i528.1'
+INFO: [HLS 214-131] Inlining function '_llvm.fpga.pack.none.i32.s_struct.ap_uint.12s' into 'lock_pool(hls::stream<ctrl_msg, 0>&, hls::stream<dir_cmd, 0>&, hls::stream<ctrl_msg, 0>&, hls::stream<dir_ack, 0>&, hls::stream<ctrl_msg, 0>&, ap_uint<32>&, ap_uint<32>&)' (./highPara/src/tmp/tmp.cpp:46:26)
+INFO: [HLS 214-131] Inlining function '_llvm.fpga.pack.none.i32.s_struct.dir_cmds' into 'lock_pool(hls::stream<ctrl_msg, 0>&, hls::stream<dir_cmd, 0>&, hls::stream<ctrl_msg, 0>&, hls::stream<dir_ack, 0>&, hls::stream<ctrl_msg, 0>&, ap_uint<32>&, ap_uint<32>&)' (/tools/Xilinx/Vitis_HLS/2021.1/common/technology/autopilot/hls_stream_39.h:174:9)
+INFO: [HLS 214-131] Inlining function '_llvm.fpga.pack.bits.i528.s_struct.ctrl_msgs.1' into 'lock_pool(hls::stream<ctrl_msg, 0>&, hls::stream<dir_cmd, 0>&, hls::stream<ctrl_msg, 0>&, hls::stream<dir_ack, 0>&, hls::stream<ctrl_msg, 0>&, ap_uint<32>&, ap_uint<32>&)' (/tools/Xilinx/Vitis_HLS/2021.1/common/technology/autopilot/hls_stream_39.h:174:9)
+INFO: [HLS 214-131] Inlining function '_llvm.fpga.pack.none.i704.s_struct.ctrl_msgs' into 'lock_pool(hls::stream<ctrl_msg, 0>&, hls::stream<dir_cmd, 0>&, hls::stream<ctrl_msg, 0>&, hls::stream<dir_ack, 0>&, hls::stream<ctrl_msg, 0>&, ap_uint<32>&, ap_uint<32>&)' (/tools/Xilinx/Vitis_HLS/2021.1/common/technology/autopilot/hls_stream_39.h:174:9)
+INFO: [HLS 214-131] Inlining function '_llvm.fpga.unpack.bits.s_struct.ctrl_msgs.i528.1' into 'lock_pool(hls::stream<ctrl_msg, 0>&, hls::stream<dir_cmd, 0>&, hls::stream<ctrl_msg, 0>&, hls::stream<dir_ack, 0>&, hls::stream<ctrl_msg, 0>&, ap_uint<32>&, ap_uint<32>&)' (/tools/Xilinx/Vitis_HLS/2021.1/common/technology/autopilot/hls_stream_39.h:145:9)
+INFO: [HLS 214-131] Inlining function '_llvm.fpga.unpack.bits.s_struct.ctrl_msgs.i528.1' into 'lock_pool(hls::stream<ctrl_msg, 0>&, hls::stream<dir_cmd, 0>&, hls::stream<ctrl_msg, 0>&, hls::stream<dir_ack, 0>&, hls::stream<ctrl_msg, 0>&, ap_uint<32>&, ap_uint<32>&)' (/tools/Xilinx/Vitis_HLS/2021.1/common/technology/autopilot/hls_stream_39.h:145:9)
+INFO: [HLS 214-131] Inlining function '_llvm.fpga.pack.none.i32.s_struct.ap_uint.12s' into 'lock_pool(hls::stream<ctrl_msg, 0>&, hls::stream<dir_cmd, 0>&, hls::stream<ctrl_msg, 0>&, hls::stream<dir_ack, 0>&, hls::stream<ctrl_msg, 0>&, ap_uint<32>&, ap_uint<32>&)' (./highPara/src/tmp/tmp.cpp:57:27)
+INFO: [HLS 200-111] Finished Compiling Optimization and Transform: CPU user time: 2.36 seconds. CPU system time: 0.19 seconds. Elapsed time: 3.22 seconds; current allocated memory: 222.167 MB.
+INFO: [HLS 200-111] Finished Checking Pragmas: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0 seconds; current allocated memory: 222.169 MB.
+INFO: [HLS 200-10] Starting code transformations ...
+INFO: [HLS 200-111] Finished Standard Transforms: CPU user time: 0.07 seconds. CPU system time: 0 seconds. Elapsed time: 0.13 seconds; current allocated memory: 232.888 MB.
+INFO: [HLS 200-10] Checking synthesizability ...
+INFO: [HLS 200-111] Finished Checking Synthesizability: CPU user time: 0.09 seconds. CPU system time: 0 seconds. Elapsed time: 0.14 seconds; current allocated memory: 247.352 MB.
+INFO: [XFORM 203-502] Unrolling all loops for pipelining in function 'lock_pool' (./highPara/src/tmp/tmp.cpp:36:25).
+INFO: [HLS 200-489] Unrolling loop 'VITIS_LOOP_101_1' (./highPara/src/tmp/tmp.cpp:98) in function 'lock_pool' completely with a factor of 80.
+INFO: [XFORM 203-102] Partitioning array 'reg_retry_ctrl_msg.dir_gblock_bitmap.V' automatically.
+INFO: [XFORM 203-101] Partitioning array 'reg_gb_index_arr.V'  in dimension 1 completely.
+INFO: [XFORM 203-11] Balancing expressions in function 'lock_pool' (/tools/Xilinx/Vitis_HLS/2021.1/common/technology/autopilot/hls_stream_39.h:36:9)...114 expression(s) balanced.
+INFO: [HLS 200-111] Finished Loop, function and other optimizations: CPU user time: 0.7 seconds. CPU system time: 0.01 seconds. Elapsed time: 0.78 seconds; current allocated memory: 287.225 MB.
+INFO: [HLS 200-472] Inferring partial write operation for 'reg_gb_index_arr.V.0' (./highPara/src/tmp/tmp.cpp:116:92)
+INFO: [HLS 200-472] Inferring partial write operation for 'reg_gb_index_arr.V.0' (./highPara/src/tmp/tmp.cpp:81:93)
+INFO: [HLS 200-111] Finished Architecture Synthesis: CPU user time: 0.29 seconds. CPU system time: 0 seconds. Elapsed time: 0.32 seconds; current allocated memory: 293.725 MB.
+INFO: [HLS 200-10] Starting hardware synthesis ...
+INFO: [HLS 200-10] Synthesizing 'lock_pool' ...
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'lock_pool' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining function 'lock_pool'.
+WARNING: [HLS 200-880] The II Violation in module 'lock_pool' (function 'lock_pool'): Unable to enforce a carried dependence constraint (II = 1, distance = 1, offset = 1) between 'store' operation ('reg_gb_index_arr_V_0_addr_1_write_ln116', ./highPara/src/tmp/tmp.cpp:116) of variable 'tmp' on array 'reg_gb_index_arr_V_0' and 'load' operation ('reg_gb_index_arr_V_0_load') on array 'reg_gb_index_arr_V_0'.
+Resolution: For help on HLS 200-880 see www.xilinx.com/cgi-bin/docs/rdoc?v=2021.1;t=hls+guidance;d=200-880.html
+WARNING: [HLS 200-885] The II Violation in module 'lock_pool' (function 'lock_pool'): Unable to schedule 'load' operation ('reg_gb_index_arr_V_0_load_2') on array 'reg_gb_index_arr_V_0' due to limited memory ports (II = 2). Please consider using a memory core with more ports or partitioning the array 'reg_gb_index_arr_V_0'.
+Resolution: For help on HLS 200-885 see www.xilinx.com/cgi-bin/docs/rdoc?v=2021.1;t=hls+guidance;d=200-885.html
+WARNING: [HLS 200-885] The II Violation in module 'lock_pool' (function 'lock_pool'): Unable to schedule 'load' operation ('reg_gb_index_arr_V_0_load_2') on array 'reg_gb_index_arr_V_0' due to limited memory ports (II = 3). Please consider using a memory core with more ports or partitioning the array 'reg_gb_index_arr_V_0'.
+Resolution: For help on HLS 200-885 see www.xilinx.com/cgi-bin/docs/rdoc?v=2021.1;t=hls+guidance;d=200-885.html
+WARNING: [HLS 200-885] The II Violation in module 'lock_pool' (function 'lock_pool'): Unable to schedule 'load' operation ('reg_gb_index_arr_V_0_load_2') on array 'reg_gb_index_arr_V_0' due to limited memory ports (II = 4). Please consider using a memory core with more ports or partitioning the array 'reg_gb_index_arr_V_0'.
+Resolution: For help on HLS 200-885 see www.xilinx.com/cgi-bin/docs/rdoc?v=2021.1;t=hls+guidance;d=200-885.html
