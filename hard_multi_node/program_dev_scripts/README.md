@@ -2,7 +2,7 @@
 
 After system startup, first time programming FPGA requires reboot. When FPGA is running normally as PCIe EP, run resetFPGA.py before programming new bitstream, follow the prompts
 
-## Multi-Machine Parallel Bit File Programming Method (Notion document: https://www.notion.so/rc4mlzju/61ce158e25904879b681a68baffaa36e)
+## Multi-Machine Parallel Bit File Programming Method
 
 Updated 2025/8/21:
     1. Configure and run python3 program_device_and_reboot_server.py on stat server (192.168.189.99), skip the following Steps

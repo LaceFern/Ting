@@ -1,4 +1,3 @@
-# FPGA-DSM: Distributed Shared Memory on FPGA
 
 ## Prerequisites
 
