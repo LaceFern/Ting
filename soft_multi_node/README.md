@@ -9,3 +9,4 @@ lspci | grep Xilinx
 1. The switch needs to support FPGA MAC-based forwarding
 2. FPGA needs to be programmed with bit file. Programming method see hard_multi_node/program_dev_scripts/README.md
 
+ 
