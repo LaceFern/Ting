@@ -1,16 +1,4 @@
 
-## Overview
-
-FPGA-DSM provides:
-
-- **Distributed Shared Memory**: Global memory abstraction across multiple nodes
-- **Cache Coherence**: MSI protocol-based cache coherence maintained by FPGA
-- **Memory Allocators**: 
-  - GlobalAllocator: Coarse-grained chunk-level allocation
-  - LocalAllocator: Fine-grained local memory management
-- **TPCC Database**: Transactional database engine built on top of DSM
-- **Multi-node Support**: Tested with up to 8 nodes
-
 ## Project Structure
 
 ```
@@ -92,7 +80,7 @@ FPGA-DSM/
 See `hard_multi_node/README.md` for complete hardware development workflow.
 
 
-### Programming FPGA
+### Programming Hardware
 
 **First Time Programming (Requires Reboot):**
 
